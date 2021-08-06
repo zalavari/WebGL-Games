@@ -31,12 +31,12 @@ const Scene = function(gl, canvas) {
 
   gl.enable(gl.DEPTH_TEST);
 
-  this.multiMesh = new MultiMesh(gl, 'media/mrem.json', [this.skinningMaterial], (multiMesh)=>{
+  this.multiMesh = new MultiMesh(gl, './media/mrem.json', [this.skinningMaterial], (multiMesh)=>{
     const animatedGeometry = multiMesh.meshes[0].geometry;
 
     this.gameObjects.push(new GameObject(multiMesh));
 
-    this.animation = new Animation(gl, 'media/thriller_part_3.json', animatedGeometry, (animation)=>{
+    this.animation = new Animation(gl, './media/thriller_part_3.json', animatedGeometry, (animation)=>{
 
       this.keyTexture = gl.createTexture();
       gl.bindTexture(gl.TEXTURE_2D, this.keyTexture);
@@ -121,8 +121,6 @@ const Scene = function(gl, canvas) {
       this.skinningMaterial.boneQTexture.set(this.boneQTexture);
       this.skinningMaterial.boneTTexture.set(this.boneTTexture);
     });
-	
-	
   });
 };
 

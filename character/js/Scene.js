@@ -131,8 +131,6 @@ Scene.prototype.update = function(gl, keysPressed) {
   const dt = (timeAtThisFrame - this.timeAtLastFrame) / 1000.0;
   const t = (timeAtThisFrame - this.timeAtFirstFrame) / 1000.0;
   this.timeAtLastFrame = timeAtThisFrame;
-  
-  if (t<10) return;
 
   Uniforms.animation.time.set(t);
 
