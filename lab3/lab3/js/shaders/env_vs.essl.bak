@@ -1,0 +1,17 @@
+Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `#version 300 es
+  in vec4 vertexPosition;
+  in vec2 vertexTexCoord;
+  out vec4 texCoord; // passed to FS
+
+  uniform struct {
+   mat4 modelViewProjMatrix;
+   mat4 rayDirMatrix;
+  } trafo;
+
+  void main(void) {
+    texCoord = vertexPosition*trafo.rayDirMatrix;
+	//texCoord.z=0.9999;
+    gl_Position = vertexPosition;
+	gl_Position.z=0.9999;
+  }
+`;

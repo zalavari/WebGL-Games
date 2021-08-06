@@ -1,0 +1,4 @@
+Heli
+Roller (a golyók pattannak is, és függőleges tengely körül forognak, de a vízszintes sebeséggükkel megegyező irányban tisztán gördülnek)
+Árnyék (Nem teljesen fekete, hanem az objektum eredeti textúrája vetítve, és elsötétíve)
+Kormány
