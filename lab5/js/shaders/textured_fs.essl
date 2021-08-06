@@ -1,0 +1,17 @@
+Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `#version 300 es 
+  precision highp float;
+
+  out vec4 fragmentColor;
+  in vec4 texCoord; // passed from VS
+  in vec3 color; // passed from VS
+
+  // we need to bind texture to this
+  uniform sampler2D colorTexture;
+
+  void main(void) {
+    fragmentColor = texture(colorTexture, texCoord.xy/texCoord.w);
+//	fragmentColor.rgb *= 0.01;
+//	fragmentColor.rgb += color;
+  }
+
+`;

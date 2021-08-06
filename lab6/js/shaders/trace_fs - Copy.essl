@@ -1,0 +1,62 @@
+Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `#version 300 es 
+  precision highp float;
+
+  out vec4 fragmentColor;
+  in vec4 rayDir;
+
+  uniform samplerCube envTexture;
+  
+  uniform sampler2D noiseTexture;
+
+	float f(vec3 p){
+	  return texture(noiseTexture, p.xz * 0.01).r - p.y;
+	  //return 1.0;
+	}
+
+
+  uniform struct{
+  	vec3 position;
+  	mat4 rayDirMatrix;
+  } camera;
+
+  void main(void) {
+  	vec3 d = normalize(rayDir.xyz);
+	
+	float t1 = (1.0 - camera.position.y) / d.y;
+  float t2 = (0.0 - camera.position.y) / d.y;
+  float tstart = max(min(t1, t2), 0.0);
+  float tend = max(max(t1, t2), 0.0);
+  
+  vec3 p = camera.position + d * tstart;
+ vec3 step =  d * min((tend - tstart)/580.0, 0.05);
+//feladat:
+// ciklus fut 128-szor
+int i=0;
+for (i=0; i<128; i++)
+{
+	step*=1.02;
+	p+=step;
+	if ( f(p)>0.0 )
+		break;
+}
+
+	if (i==128)
+
+		fragmentColor = texture(envTexture, rayDir.xyz);
+	else
+	{
+		vec3 gradient = vec3(
+      f(p + vec3(+0.05, 0.0, 0.0) ) -
+      f(p + vec3(-0.05, 0.0, 0.0) ) ,
+      f(p + vec3(0.0, +0.05, 0.0) ) -
+      f(p + vec3(0.0, -0.05, 0.0) ) , 
+      f(p + vec3(0.0, 0.0, +0.05) ) -
+      f(p + vec3(0.0, 0.0, -0.05) ) 
+    );
+
+	fragmentColor.xyz=normalize(gradient);
+	}
+		
+  }
+
+`;

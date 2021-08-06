@@ -1,0 +1,98 @@
+Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `#version 300 es 
+  precision highp float;
+
+  out vec4 fragmentColor;
+  in vec4 texCoord; // passed from VS
+  in vec4 worldPos;
+  in vec4 worldNormal;
+  in vec4 modelPosition;
+
+  // we need to bind texture to this
+  uniform sampler2D colorTexture;
+  
+  uniform samplerCube envMapTexture;
+  
+  
+uniform struct
+{
+	vec3 lightPos;
+	float power;
+	vec3 kd;
+	vec3 ks;
+	float gamma;	
+   vec3 cameraPos;
+} light;
+
+
+float snoise(vec3 r) {
+  vec3 s = vec3(7502, 22777, 4767);
+  float f = 0.0;
+  for(int i=0; i<16; i++) {
+    f += sin( dot(s - vec3(32768, 32768, 32768), r)
+                                 / 65536.0);
+    s = mod(s, 32768.0) * 2.0 + floor(s / 32768.0);
+  }
+  return f / 32.0 + 0.5;
+}
+
+vec3 snoiseGrad(vec3 r) {
+  vec3 s = vec3(7502, 22777, 4767);
+  vec3 f = vec3(0.0, 0.0, 0.0);
+  for(int i=0; i<16; i++) {
+    f += cos( dot(s - vec3(32768, 32768, 32768), r)
+                   / 65536.0) * s;
+    s = mod(s, 32768.0) * 2.0 + floor(s / 32768.0);
+  }
+  return f / 65536.0; // + 0.5
+}
+
+
+void main(void) {
+	
+	vec3 lightDir=light.lightPos-worldPos.xyz;
+	lightDir=normalize(lightDir);
+	
+	vec3 viewDir = light.cameraPos-worldPos.xyz;
+	viewDir=normalize(viewDir);
+	
+    
+	vec3 normal = normalize(worldNormal.xyz);
+	
+	float cosa=dot(lightDir,normal);
+	if (cosa < 0.0) cosa=0.0;
+	//fragmentColor=vec4(abs(normal),1);
+	
+
+	
+	float costhetamarked=dot(worldNormal.xyz,lightDir);
+	if (costhetamarked <0.0) costhetamarked=0.0;
+	float costheta=dot(worldNormal.xyz,viewDir);
+	if (costheta <0.0) costheta=0.0;
+	
+
+vec3 lightWoodColor=vec3(0.8,0.4,0.2);
+vec3 darkWoodColor=vec3(0.3,0.15,0.1);
+float freq=5.0;
+float noiseFreq=10.0;
+float noiseExp=1.0;
+float noiseAmp=10.0;
+
+float w = fract( modelPosition.x*freq   + pow(snoise(modelPosition.xyz * noiseFreq), noiseExp)    * noiseAmp );
+
+vec3 color = mix( lightWoodColor, darkWoodColor, w);
+fragmentColor= vec4(color, 1);
+
+
+float szorzo=pow(cosa,light.gamma)*costhetamarked/max(costheta,costhetamarked);
+
+	fragmentColor.x = fragmentColor.x*(light.kd.x+light.ks.x*szorzo);
+	fragmentColor.y = fragmentColor.y*(light.kd.y+light.ks.y*szorzo);
+	fragmentColor.z = fragmentColor.z*(light.kd.z+light.ks.z*szorzo);
+	
+	
+  }
+  
+  
+  
+
+`;

@@ -1,0 +1,42 @@
+Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `#version 300 es
+  in vec4 vertexPosition;
+  in vec4 vertexTexCoord;
+  in vec4 vertexNormal;
+  in vec4 blendWeights;
+  in uvec4 blendIndices;  
+  out vec4 texCoord; // passed to FS
+  out vec3 color;
+
+  struct DualQuat {
+    vec4 q;
+    vec4 t;
+  };
+
+  uniform sampler2D boneQTexture;
+  uniform sampler2D boneTTexture;
+
+  uniform struct {
+    mat4 modelViewProjMatrix;
+  } trafo;
+
+
+  void main(void) {
+    DualQuat dq;
+    dq.q = vec4(0, 0, 0, 1);
+    dq.t = vec4(0, 0, 0, 0);  
+    // LAB TODO:
+    // - transzformacio a boneTexture-bol blendIndices.x alapjan
+    // - vertex blending
+    // - peldanyok eltolasa
+
+    vec3 blendedPos = vertexPosition.xyz + 2.0 * cross(dq.q.xyz,
+              cross(dq.q.xyz, vertexPosition.xyz) +
+              dq.q.w * vertexPosition.xyz);
+    vec3 trans = 2.0*(dq.q.w*dq.t.xyz - dq.t.w*dq.q.xyz + cross(dq.q.xyz, dq.t.xyz));
+    blendedPos += trans;
+
+    gl_Position = vec4(blendedPos, 1) * trafo.modelViewProjMatrix;
+    texCoord = vertexTexCoord;
+    color = vec3(fract(float(blendIndices.z)*0.02), fract(float(blendIndices.y)*0.02), fract(float(blendIndices.w)*0.02));
+  }
+`;

@@ -1,0 +1,24 @@
+Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `#version 300 es
+  in vec4 vertexPosition;
+  in vec4 vertexTexCoord;
+  in vec3 vertexNormal;
+  out vec4 texCoord; // passed to FS
+  out vec4 worldPos;
+  out vec4 worldNormal;
+  out vec4 modelPosition;
+
+  uniform struct {
+   mat4 modelMatrix;
+   mat4 modelMatrixInverse;
+   mat4 viewProjMatrix;
+  } trafo;
+  
+
+  void main(void) {
+    texCoord = vertexTexCoord;
+	worldPos = vertexPosition*trafo.modelMatrix;
+	worldNormal = trafo.modelMatrixInverse*vec4(vertexNormal, 0);
+	modelPosition=vertexPosition;
+    gl_Position = vertexPosition *trafo.modelMatrix*trafo.viewProjMatrix;
+  }
+`;

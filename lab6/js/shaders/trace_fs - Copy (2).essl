@@ -1,0 +1,88 @@
+Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `#version 300 es 
+  precision highp float;
+
+  out vec4 fragmentColor;
+  in vec4 rayDir;
+
+  uniform samplerCube envTexture;
+  
+  uniform sampler2D noiseTexture;
+
+float f(vec3 r) {
+  vec3 s = vec3(7502, 22777, 4767);
+  float w = 0.0;
+  for(int i=0; i<16; i++) {
+    w += sin( dot(s - vec3(32768, 32768, 32768),
+            r * 40.0) / 65536.0);
+    s = mod(s, 32768.0) * 2.0 + floor(s / 32768.0);
+  }
+  return w / 32.0 + 0.5 - r.y;
+}
+
+vec3 fGrad(vec3 r) {
+  vec3 s = vec3(7502, 22777, 4767);
+  vec3 w = vec3(0.0, 0.0, 0.0);
+  for(int i=0; i<16; i++) {
+    w += cos( dot(s - vec3(32768, 32768, 32768),
+              r*40.0) / 65536.0) 
+         * (s - vec3(32768, 32768, 32768)) * 40.0;
+    s = mod(s, 32768.0) * 2.0 + floor(s / 32768.0);
+  }
+  return w / 65536.0 - vec3(0, 1, 0);
+}
+
+
+
+  uniform struct{
+  	vec3 position;
+  	mat4 rayDirMatrix;
+  } camera;
+
+  void main(void) {
+  	vec3 d = normalize(rayDir.xyz);
+	
+	float t1 = (1.0 - camera.position.y) / d.y;
+  float t2 = (0.0 - camera.position.y) / d.y;
+  float tstart = max(min(t1, t2), 0.0);
+  float tend = max(max(t1, t2), 0.0);
+  
+  vec3 p = camera.position + d * tstart;
+  vec3 step =  d * (tend - tstart);
+ 
+
+  step *= 0.5;
+  p += step;
+  bool hit=false;
+  for(int j=0; j<16; j++) {
+    float h = f(p);
+    if(h < 0.0) 
+      p += step;
+    else
+	{
+      p -= step;
+	  hit=true;
+	}
+    step *= 0.5;
+  }
+
+
+	if (!hit)
+
+		fragmentColor = texture(envTexture, rayDir.xyz);
+	else
+	{
+		vec3 gradient = vec3(
+      f(p + vec3(+0.05, 0.0, 0.0) ) -
+      f(p + vec3(-0.05, 0.0, 0.0) ) ,
+      f(p + vec3(0.0, +0.05, 0.0) ) -
+      f(p + vec3(0.0, -0.05, 0.0) ) , 
+      f(p + vec3(0.0, 0.0, +0.05) ) -
+      f(p + vec3(0.0, 0.0, -0.05) ) 
+    );
+
+	fragmentColor.xyz=normalize(fGrad(p));
+	}
+		
+  }
+
+`;

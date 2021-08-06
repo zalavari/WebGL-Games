@@ -1,0 +1,55 @@
+Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `#version 300 es 
+  precision highp float;
+
+  out vec4 fragmentColor;
+  in vec4 texCoord; // passed from VS
+  in vec4 worldPos;
+  in vec4 worldNormal;
+
+  uniform samplerCube envMapTexture;
+  
+  uniform vec3 kd;
+  uniform vec3 ks;
+  uniform float gamma;	
+  
+uniform struct
+{
+	vec3 lightPos;
+	float power;
+
+   vec3 cameraPos;
+} light;
+
+void main(void) {
+	
+	vec3 lightDir=light.lightPos-worldPos.xyz;
+	lightDir=normalize(lightDir);
+	
+	vec3 viewDir = light.cameraPos-worldPos.xyz;
+	viewDir=normalize(viewDir);
+	
+    
+	vec3 normal = normalize(worldNormal.xyz);
+	
+	vec3 halfway = lightDir+viewDir;
+	halfway=normalize(halfway);
+	
+	float cosa=dot(halfway,normal);
+	if (cosa < 0.0) cosa=0.001;
+	
+	
+	float costhetamarked=dot(normal,lightDir);
+	if (costhetamarked <0.0) costhetamarked=0.001;
+	float costheta=dot(normal,viewDir);
+	if (costheta <0.0) costheta=0.001;
+
+	fragmentColor = texture(envMapTexture, reflect(-viewDir.xyz, worldNormal.xyz));
+
+    float szorzo=pow(cosa,gamma)*costhetamarked/max(costheta,costhetamarked);
+	
+	fragmentColor.xyz = fragmentColor.xyz*(kd+ks*szorzo);
+	
+	
+  }
+
+`;

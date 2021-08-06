@@ -1,0 +1,27 @@
+Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `#version 300 es 
+precision highp float;
+
+in vec2 texCoord; // passed from VS
+
+// we need to bind texture to this
+uniform sampler2D keyTexture;
+
+
+uniform struct {
+	float time;
+	} animation;
+
+
+layout(location = 0) out vec4 fragQ;
+layout(location = 1) out vec4 fragT;
+
+void main(){	
+  float iInstance = (texCoord.x * 32.0) + 0.5;
+  float iNode = (texCoord.y * 58.0);
+  
+  float iKey = mod(floor(animation.time*40.0+iInstance*77.0)*2.0,768.0); 
+  fragQ = texture(keyTexture, vec2(iKey / 768.0 / 2.0, iNode / 58.0));
+  iKey += 1.0;
+  fragT = texture(keyTexture, vec2(iKey / 768.0 / 2.0, iNode / 58.0));  
+}
+`;

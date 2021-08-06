@@ -1,0 +1,154 @@
+Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `#version 300 es 
+	precision highp float;
+
+out vec4 fragmentColor;
+in vec4 rayDir;
+
+const int ballCount=8;
+
+uniform samplerCube envTexture;
+   
+   
+uniform struct{
+	vec3 position;
+	mat4 rayDirMatrix;
+} camera;
+
+uniform struct
+{
+	vec3 dir;
+	vec3 kd;
+	vec3 ks;
+	float gamma;	
+} light;
+
+
+uniform struct{
+	vec4 balls[ballCount];
+} meta;
+
+  
+float fj(vec3 r, int j)
+{
+	float rScalar=length(r-meta.balls[j].xyz)/meta.balls[j].w;
+	return 1.0/rScalar/rScalar;
+}
+ 
+vec3 gradfj(vec3 r, int j)
+{
+	float rScalar=length(r-meta.balls[j].xyz)/meta.balls[j].w;
+	vec3 result=(r-meta.balls[j].xyz);
+	return result*-2.0/rScalar/rScalar/rScalar;
+} 
+
+
+float f(vec3 r)
+{
+	float result=-1.0;
+	for (int i=0; i<ballCount; i++)
+	{
+		result+=fj(r,i);
+	}
+	
+	return result;
+}
+
+vec3 fGrad(vec3 r)
+{
+	vec3 result=vec3(0.0,0.0,0.0);
+	for (int i=0; i<ballCount; i++)
+	{
+		result+=gradfj(r,i);
+	}
+	
+	return result;	
+}
+
+
+vec3 numericfGrad(vec3 p)
+{
+	vec3 result=vec3(
+      f(p + vec3(+0.005, 0.0, 0.0) ) -
+      f(p + vec3(-0.005, 0.0, 0.0) ) ,
+      f(p + vec3(0.0, +0.005, 0.0) ) -
+      f(p + vec3(0.0, -0.005, 0.0) ) , 
+      f(p + vec3(0.0, 0.0, +0.005) ) -
+      f(p + vec3(0.0, 0.0, -0.005) ) 
+	  );
+	  return result;
+}
+
+
+ void main(void) {
+
+	 
+	vec3 d = normalize(rayDir.xyz);
+
+	float t1 = (20.0 - camera.position.y) / d.y;
+	float t2 = (-20.0 - camera.position.y) / d.y;
+	float tstart = max(min(t1, t2), 0.0);
+	float tend = max(max(t1, t2), 0.0);
+
+	vec3 p = camera.position + d * tstart;
+	vec3 step =  d * min((tend - tstart)/580.0, 0.05);
+	
+	
+	int i=0;
+	for (i=0; i<128; i++)
+	{
+		step*=1.02;
+		p+=step;
+		if ( f(p)>0.0 )
+			break;
+	}
+
+
+	if (i==128)
+	{
+		fragmentColor = texture(envTexture, rayDir.xyz);
+		
+	}
+	else
+	{
+	  step *= 0.5;
+	  p -= step;
+	  for(int j=0; j<16; j++) {
+		float h = f(p);
+		if(h < 0.0) 
+		  p += step;
+		else
+		  p -= step;
+		step *= 0.5;
+	  }
+	
+	vec3 lightDir=normalize(light.dir);
+	
+	vec3 normal = -normalize(fGrad(p));
+	
+	d=-d;
+	
+	vec3 halfway = lightDir+d;
+	halfway=normalize(halfway);
+	
+	float cosa=dot(halfway,normal);
+	if (cosa < 0.0) cosa=0.001;
+
+	float costhetamarked=dot(normal,lightDir);
+	if (costhetamarked <0.0) costhetamarked=0.001;
+	
+	float costheta=dot(normal,d);
+	if (costheta <0.0) costheta=0.001;
+
+	fragmentColor = texture(envTexture, reflect(-d, normal));
+
+	float szorzo=pow(cosa,light.gamma)*costhetamarked/max(costheta,costhetamarked);
+
+	fragmentColor.xyz = fragmentColor.xyz*(light.kd+light.ks*szorzo);
+	
+	
+	}
+	
+		
+  }
+
+`;

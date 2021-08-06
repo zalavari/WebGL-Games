@@ -1,0 +1,55 @@
+Shader.source[document.currentScript.src.split('js/shaders/')[1]] = `#version 300 es 
+precision highp float;
+precision highp usampler2D;
+precision highp int;
+
+in vec2 texCoord; // passed from VS
+
+// we need to bind texture to this
+uniform usampler2D skeletonTexture;
+uniform sampler2D riggingTexture;
+uniform sampler2D nodeQTexture;
+uniform sampler2D nodeTTexture;
+
+uniform struct {
+	float time;
+	} animation;
+
+struct DualQuat {
+	vec4 q;
+	vec4 t;
+};
+
+vec4 qmul( vec4 q1, vec4 q2 ) {
+   vec4 r;
+
+   r.w   = q1.w * q2.w - dot( q1.xyz, q2.xyz );
+   r.xyz = q1.w * q2.xyz + q2.w * q1.xyz + cross( q1.xyz, q2.xyz );
+
+   return r;
+}
+
+
+DualQuat dqmul(DualQuat q, DualQuat r) {
+	DualQuat dq;
+	dq.q = qmul(q.q, r.q);
+	dq.t = qmul(q.q, r.t) + qmul(q.t, r.q);
+	return dq;
+}
+
+layout(location = 0) out vec4 fragQ;
+layout(location = 1) out vec4 fragT;
+
+void main(){
+  float iBone = (texCoord.x * 46.0); //TODO nBones
+  float iInstance = (texCoord.y * 32.0);
+
+  DualQuat dq;
+  dq.q = vec4(0, 0, 0, 1);
+  dq.t = vec4(0, 0, 0, 0);  
+  // LAB TODO: transzformacios lanc
+
+	fragQ = dq.q;
+	fragT = dq.t;
+}
+`;
