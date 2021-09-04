@@ -1,0 +1,13 @@
+moving figure - hf1
+tank - hf2
+car - hf3
+water - hf4
+snake - hf5
+mirrorfluid - hf6
+
+triangle - lab1
+asteroids - lab2
+slowpoke - lab3
+shiny car - lab4
+dancing zombies - lab5
+terrain - lab6
