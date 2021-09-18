@@ -39,22 +39,24 @@ GameObject.prototype.bounce = function(walls)
 	for (let i=0; i<walls.length; i++)
 	{
 		let wall=walls[i];
-		let deltax = Math.abs(wall.position.x-this.position.x);
-		let deltay = Math.abs(wall.position.y-this.position.y);
+		let deltaX = wall.position.x-this.position.x;
+		let deltaY = wall.position.y-this.position.y;
+		let distX = Math.abs(deltaX);
+		let distY = Math.abs(deltaY);
 		
-		if (deltax<wall.length/2+this.radius) //Falra merőleges irányban van-e?
+		if (distX<wall.length/2+this.radius) //Falra merőleges irányban van-e?
 		{
-			if (Math.abs(deltay-wall.width/2)<this.radius)	//Elég közel van-e a fal széléhez?
-				if (wall.position.y<this.position.y && this.velocity.y<0 || wall.position.y>this.position.y && this.velocity.y>0) //fal felé halad-e?
+			if (Math.abs(distY-wall.width/2)<this.radius)	//Elég közel van-e a fal széléhez?
+				if (deltaY<0 && this.velocity.y<0 || deltaY>0 && this.velocity.y>0) //fal felé halad-e?
 				{
 					this.velocity.y=-this.velocity.y;
 				}
 		}	
 	
-		if (deltay<wall.width/2+this.radius) //Falra merőleges irányban van-e?
+		if (distY<wall.width/2+this.radius) //Falra merőleges irányban van-e?
 		{
-			if (Math.abs(deltax-wall.length/2)<this.radius)	//Elég közel van-e a fal széléhez?
-				if (wall.position.x<this.position.x && this.velocity.x<0 || wall.position.x>this.position.x && this.velocity.x>0) //fal felé halad-e?
+			if (Math.abs(distX-wall.length/2)<this.radius)	//Elég közel van-e a fal széléhez?
+				if (deltaX<0 && this.velocity.x<0 || deltaX>0 && this.velocity.x>0) //fal felé halad-e?
 				{
 					this.velocity.x=-this.velocity.x;
 				}					

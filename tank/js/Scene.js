@@ -94,27 +94,6 @@ const Scene = function(gl) {
 		this.gameObjects.walls.push(wall);
 	}	
 	
-	//BALLS SETUP
-	this.ballmovinglogic= function(t, dt, keysPressed, gameObjects)
-		{
-			this.bounce(gameObjects.walls);
-						
-			this.timeToLive-=dt;
-			this.acceleration.set();
-			
-			this.velocity.addScaled(dt, this.acceleration);
-			this.position.addScaled(dt, this.velocity);
-			
-			//this.velocity.setScaled(this.velocity, Math.exp(-dt));			
-		}
-	
-	//EXPLOSION
-	this.explosiomovinglogic= function(t, dt, keysPressed, gameObjects)
-	{
-		this.timeToLive-=dt;
-		let kepkocka=35-Math.ceil(this.timeToLive/3*36);
-		this.mesh.material.offsetTexture.set(Math.floor(kepkocka%6),Math.floor(kepkocka/6));			
-	}
 	
 	//CAMERA
 	this.camera = new OrthoCamera();	
@@ -157,27 +136,23 @@ Scene.prototype.update = function(gl, keysPressed) {
 	
 	this.bgObject.draw(this.camera);
 	
-	//for (let i=0; i<this.gameObjects.length; i++)
-	//	this.gameObjects[i].move(t, dt, keysPressed, this.gameObjects);
-	
 	for (let i=0; i<this.gameObjects.walls.length; i++)
 	{
 		this.gameObjects.walls[i].draw(this.camera);
 	}
-	
-	let torlendo=-1;
+
+	//UPDATE PELLETS
 	for (let i=0; i<this.gameObjects.balls.length; i++)
 	{
 		let ball=this.gameObjects.balls[i];
 		ball.move(t, dt, keysPressed, this.gameObjects)
 		ball.draw(this.camera);
-		if (ball.timeToLive<0)
-			torlendo=i;
 	}
-	this.gameObjects.balls.splice(0, torlendo+1);
+
+	this.gameObjects.balls = this.gameObjects.balls.filter(function(ball) { return ball.timeToLive > 0 })
 	
 	
-	
+	//UPDATE TANKS
 	for (let i=0; i<this.gameObjects.tanks.length; i++)
 	{
 		let tank=this.gameObjects.tanks[i];
@@ -200,25 +175,27 @@ Scene.prototype.update = function(gl, keysPressed) {
 			
 			let anim=new GameObject(this.explosionMesh);
 			anim.position.set(tank.position);
-			anim.move=this.explosiomovinglogic;
+			anim.move = function(t, dt, keysPressed, gameObjects)
+			{
+				this.timeToLive-=dt;
+				let kepkocka=35-Math.ceil(this.timeToLive/3*36);
+				this.mesh.material.offsetTexture.set(Math.floor(kepkocka%6),Math.floor(kepkocka/6));			
+			}
 			anim.timeToLive=3;
 			this.gameObjects.animations.push(anim);	
 		}
 		
-	}
-		
+	}		
 	
-	torlendo=-1;
+	//UPDATE ANIMATIONS
 	for (let i=0; i<this.gameObjects.animations.length; i++)
 	{
 		let anim=this.gameObjects.animations[i]
 		anim.move(t, dt, keysPressed, this.gameObjects)
 		anim.draw(this.camera);
-		
-		if (anim.timeToLive<0)
-			torlendo=i;
-	}
-	this.gameObjects.animations.splice(0, torlendo+1);
+	}	
+	this.gameObjects.animations = this.gameObjects.animations.filter(function(anim) { return anim.timeToLive > 0 })
+
  
 };
 
@@ -228,20 +205,8 @@ Scene.prototype.fire = function(tank)
 		return null;
 	
 	tank.cooldown=0.5;
-	let ballObject= new GameObject(this.ballmesh);
-	let dir= new Vec3(-Math.sin(tank.orientation),Math.cos(tank.orientation),0);
-	
-	ballObject.position.set(tank.position);
-	
-	ballObject.position.addScaled(tank.radius+2*ballObject.radius,dir);
-	ballObject.scale.set(0.1,0.1,0);
-	ballObject.velocity.setScaled(dir,5);
-	ballObject.velocity.add(tank.velocity);
-	ballObject.move=this.ballmovinglogic;
-	ballObject.timeToLive=5;
-	
-	this.gameObjects.balls.push(ballObject);
-	
+	let ballObject= new Pellet(this.ballmesh, tank);	
+	this.gameObjects.balls.push(ballObject);	
 }
 
 
