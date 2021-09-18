@@ -7,8 +7,8 @@ const GameObject = function(mesh) {
 
   this.modelMatrix = new Mat4(); 
   
-  this.velocity= new Vec3();
-  this.acceleration= new Vec3();
+  this.velocity = new Vec3();
+  this.acceleration = new Vec3();
   
   this.timeToLive=3;//used by ball, animation
   this.cooldown=0; //used by tank
@@ -45,29 +45,30 @@ GameObject.prototype.bounce = function(walls)
 {
 	
 	for (let i=0; i<walls.length; i++)
-			{
-				let wall=walls[i];
-				if (wall.horizontal) //fal irányultsága
+	{
+		let wall=walls[i];
+		let deltax = Math.abs(wall.position.x-this.position.x);
+		let deltay = Math.abs(wall.position.y-this.position.y);
+		
+		if (deltax<wall.length/2+this.radius) //Falra merőleges irányban van-e?
+		{
+			if (Math.abs(deltay-wall.width/2)<this.radius)	//Elég közel van-e a fal széléhez?
+				if (wall.position.y<this.position.y && this.velocity.y<0 || wall.position.y>this.position.y && this.velocity.y>0) //fal felé halad-e?
 				{
-					if (Math.abs(wall.position.x-this.position.x)<wall.length/2+this.radius) //Falra merőleges irányban van-e?
-					{
-						if (Math.abs(wall.position.y-this.position.y)<wall.width/2+this.radius)	//Elég közel van-e a falhoz?
-							if (wall.position.y<this.position.y && this.velocity.y<0 || wall.position.y>this.position.y && this.velocity.y>0) //fal felé halad-e?
-							{
-								this.velocity.y=-this.velocity.y;
-							}
-					}
+					this.velocity.y=-this.velocity.y;
 				}
-				else
+		}
+	
+	
+		if (deltay<wall.width/2+this.radius) //Falra merőleges irányban van-e?
+		{
+			if (Math.abs(deltax-wall.length/2)<this.radius)	//Elég közel van-e a fal széléhez?
+
+				if (wall.position.x<this.position.x && this.velocity.x<0 || wall.position.x>this.position.x && this.velocity.x>0) //fal felé halad-e?
 				{
-					if (Math.abs(wall.position.y-this.position.y)<wall.length/2+this.radius) //Falra merőleges irányban van-e?
-					{
-						if (Math.abs(wall.position.x-this.position.x)<wall.width/2+this.radius)	//Elég közel van-e a falhoz?
-							if (wall.position.x<this.position.x && this.velocity.x<0 || wall.position.x>this.position.x && this.velocity.x>0) //fal felé halad-e?
-							{
-								this.velocity.x=-this.velocity.x;
-							}					
-					}
-				}
-			}
+					this.velocity.x=-this.velocity.x;
+				}					
+		}
+		
+	}
 }

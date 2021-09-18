@@ -1,15 +1,18 @@
 const Wall = function(mesh, horizontal, width, length)
 {
 	this.gameObject=new GameObject(mesh);
-	this.horizontal=horizontal;
-	this.width=width;
-	this.length=length;
 	
+	if (horizontal)
+	{
+		this.width=width;
+		this.length=length;
+	}
+	else
+	{
+		this.length=width;
+		this.width=length;
+	}
 	this.gameObject.scale.set(this.length/2, this.width/2, 1);
-	if (!horizontal)
-		this.gameObject.orientation=Math.PI/2;
-	
-
 	this.position = this.gameObject.position; 
 	
 }

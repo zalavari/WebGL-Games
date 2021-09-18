@@ -55,7 +55,7 @@ const Scene = function(gl) {
 	tankA.position.set(-5,-5);
 	tankA.radius=0.6;
 	tankA.invmass=5;
-	let movingLogic = function(t, dt, keysPressed, gameObjects)
+	this.movingLogicA = function(t, dt, keysPressed, gameObjects)
 		{
 			this.bounce(gameObjects.walls);
 			
@@ -94,7 +94,7 @@ const Scene = function(gl) {
 			this.velocity.addScaled(dt, this.acceleration);
 			this.position.addScaled(dt, this.velocity);			
 		}
-	tankA.move = movingLogic
+	tankA.move = this.movingLogicA
 	
 	this.gameObjects.tanks.push(tankA);
 	
@@ -103,7 +103,7 @@ const Scene = function(gl) {
 	tankB.radius=0.6;
 	tankB.invmass=5;
 	tankB.orientation=Math.PI;
-	movingLogic = function(t, dt, keysPressed, gameObjects)
+	this.movingLogicB = function(t, dt, keysPressed, gameObjects)
 		{
 			
 			this.bounce(gameObjects.walls);
@@ -145,11 +145,14 @@ const Scene = function(gl) {
 			this.velocity.addScaled(dt, this.acceleration);
 			this.position.addScaled(dt, this.velocity);			
 		}
-	tankB.move = movingLogic
+	tankB.move = this.movingLogicB
 	
 	this.gameObjects.tanks.push(tankB);
 	
 	
+	this.movingLogic = [];
+	this.movingLogic.push(this.movingLogicA);
+	this.movingLogic.push(this.movingLogicB);
 	//WALLS SETUP
 	let wall;
 
@@ -261,9 +264,6 @@ Scene.prototype.update = function(gl, keysPressed) {
 	
 	for (let i=0; i<this.gameObjects.walls.length; i++)
 	{
-		
-		
-		//this.gameObjects.walls[i].move(t, dt, keysPressed, this.gameObjects)
 		this.gameObjects.walls[i].draw(this.camera);
 	}
 	
@@ -283,9 +283,20 @@ Scene.prototype.update = function(gl, keysPressed) {
 	for (let i=0; i<this.gameObjects.tanks.length; i++)
 	{
 		let tank=this.gameObjects.tanks[i];
-		if (tank.dead) continue;
-		
+
 		tank.move(t, dt, keysPressed, this.gameObjects)
+
+		if (tank.dead)
+		{
+			if (tank.timeToLive<0)
+			{
+				tank.dead=false;
+				tank.move=this.movingLogic[i];
+			}
+			continue;
+		}
+		
+		
 		tank.draw(this.camera);
 		
 		if (tank.hit && !tank.dead)
@@ -334,13 +345,13 @@ Scene.prototype.fire = function(tank)
 
 Scene.prototype.kill = function(tank)
 {
-	tank.cooldown=0.3;
-	tank.dead=true
-	tank.move=this.explodingmovinglogic
-	tank.timeToLive=1.5;
+	tank.dead = true;
+	tank.hit = false;
+	tank.move=this.explodingmovinglogic;
+	tank.timeToLive=5;
 	
 	let anim=new GameObject(this.explosionMesh);
-	anim.position.set(tank.position)
+	anim.position.set(tank.position);
 	anim.move=this.explosiomovinglogic;
 	anim.timeToLive=3;
 	this.gameObjects.animations.push(anim);	
