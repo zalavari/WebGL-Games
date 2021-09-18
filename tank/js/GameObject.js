@@ -10,13 +10,10 @@ const GameObject = function(mesh) {
   this.velocity = new Vec3();
   this.acceleration = new Vec3();
   
-  this.timeToLive=3;//used by ball, animation
-  this.cooldown=0; //used by tank
-  this.hit=false;  //used by tank
-  this.dead=false; //used by tank
-  this.invmass=5; //used by tank
+  this.timeToLive=3;//used by tank, ball, animation  
   this.radius=0.1; //used by tank, ball
 };
+
 
 GameObject.prototype.updateModelTransformation = function(){ 
 
@@ -36,11 +33,6 @@ GameObject.prototype.move = function(t, dt, keysPressed, gameObjects) {
 	this.position.addScaled(dt,this.velocity);
 }
 
-GameObject.prototype.refreshState = function(t, dt) {
-	this.timeToLive-=dt;
-	this.cooldown-=dt;
-}
-
 GameObject.prototype.bounce = function(walls)
 {
 	
@@ -57,13 +49,11 @@ GameObject.prototype.bounce = function(walls)
 				{
 					this.velocity.y=-this.velocity.y;
 				}
-		}
-	
+		}	
 	
 		if (deltay<wall.width/2+this.radius) //Falra merőleges irányban van-e?
 		{
 			if (Math.abs(deltax-wall.length/2)<this.radius)	//Elég közel van-e a fal széléhez?
-
 				if (wall.position.x<this.position.x && this.velocity.x<0 || wall.position.x>this.position.x && this.velocity.x>0) //fal felé halad-e?
 				{
 					this.velocity.x=-this.velocity.x;

@@ -51,108 +51,16 @@ const Scene = function(gl) {
 	}
 	
 	//TANKS SETUP
-	let tankA=new GameObject(this.avatarAmesh)
+	let tankA=new Tank(this.avatarAmesh, "UP", "DOWN", "LEFT", "RIGHT")
 	tankA.position.set(-5,-5);
-	tankA.radius=0.6;
-	tankA.invmass=5;
-	this.movingLogicA = function(t, dt, keysPressed, gameObjects)
-		{
-			this.bounce(gameObjects.walls);
-			
-			for (let i=0; i<gameObjects.balls.length; i++)
-			{
-				let ball = gameObjects.balls[i]
-				let dist = ball.position.minus(this.position);
-				if (dist.length()<this.radius+ball.radius)
-					this.hit=true;
-			} 
-			
-			this.cooldown-=dt;
-			this.acceleration.set();
-			//this.acceleration.set(-Math.sin(this.orientation),Math.cos(this.orientation),0);
-			if (keysPressed["LEFT"])
-			{
-				this.orientation+=Math.PI*dt;				
-			}
-			if (keysPressed["RIGHT"])
-			{
-				this.orientation+=-Math.PI*dt;	
-			}
-			if (keysPressed["UP"])
-			{
-				this.acceleration.set(-Math.sin(this.orientation),Math.cos(this.orientation),0);
-			}
-			if (keysPressed["DOWN"])
-			{
-				this.acceleration.set(Math.sin(this.orientation),-Math.cos(this.orientation),0);
-			}
-
-			this.velocity.setScaled(this.velocity, Math.exp(-dt));
-			
-			this.acceleration.mul(this.invmass);
-			
-			this.velocity.addScaled(dt, this.acceleration);
-			this.position.addScaled(dt, this.velocity);			
-		}
-	tankA.move = this.movingLogicA
-	
 	this.gameObjects.tanks.push(tankA);
 	
-	let tankB=new GameObject(this.avatarBmesh)
+	let tankB=new Tank(this.avatarBmesh, "W", "S", "A", "D");
 	tankB.position.set(5,5);
-	tankB.radius=0.6;
-	tankB.invmass=5;
 	tankB.orientation=Math.PI;
-	this.movingLogicB = function(t, dt, keysPressed, gameObjects)
-		{
-			
-			this.bounce(gameObjects.walls);
-			
-			for (let i=0; i<gameObjects.balls.length; i++)
-			{
-				let ball = gameObjects.balls[i]
-				let dist = ball.position.minus(this.position);
-				if (dist.length()<this.radius+ball.radius)
-				{
-					this.hit=true;					
-				}
-			} 
-			
-			this.cooldown-=dt;
-			this.acceleration.set();
-			//this.acceleration.set(-Math.sin(this.orientation),Math.cos(this.orientation),0);
-			if (keysPressed["A"])
-			{
-				this.orientation+=Math.PI*dt;				
-			}
-			if (keysPressed["D"])
-			{
-				this.orientation+=-Math.PI*dt;	
-			}
-			if (keysPressed["W"])
-			{
-				this.acceleration.set(-Math.sin(this.orientation),Math.cos(this.orientation),0);
-			}
-			if (keysPressed["S"])
-			{
-				this.acceleration.set(Math.sin(this.orientation),-Math.cos(this.orientation),0);
-			}
-
-			this.velocity.setScaled(this.velocity, Math.exp(-dt));
-			
-			this.acceleration.mul(this.invmass);
-			
-			this.velocity.addScaled(dt, this.acceleration);
-			this.position.addScaled(dt, this.velocity);			
-		}
-	tankB.move = this.movingLogicB
 	
 	this.gameObjects.tanks.push(tankB);
 	
-	
-	this.movingLogic = [];
-	this.movingLogic.push(this.movingLogicA);
-	this.movingLogic.push(this.movingLogicB);
 	//WALLS SETUP
 	let wall;
 
@@ -184,10 +92,7 @@ const Scene = function(gl) {
 		wall=new Wall(this.wallmesh,true,0.2,5);
 		wall.position.set(0,-10+5*i);
 		this.gameObjects.walls.push(wall);
-	}
-	
-	
-		
+	}	
 	
 	//BALLS SETUP
 	this.ballmovinglogic= function(t, dt, keysPressed, gameObjects)
@@ -210,16 +115,9 @@ const Scene = function(gl) {
 		let kepkocka=35-Math.ceil(this.timeToLive/3*36);
 		this.mesh.material.offsetTexture.set(Math.floor(kepkocka%6),Math.floor(kepkocka/6));			
 	}
-	this.explodingmovinglogic= function(t, dt, keysPressed, gameObjects)
-	{
-		this.timeToLive-=dt;
-		this.acceleration.set();
-		this.velocity.set();	
-	}
 	
 	//CAMERA
-	this.camera = new OrthoCamera();
-	
+	this.camera = new OrthoCamera();	
 	
 	//BLENDING
 	gl.enable(gl.BLEND);
@@ -288,11 +186,6 @@ Scene.prototype.update = function(gl, keysPressed) {
 
 		if (tank.dead)
 		{
-			if (tank.timeToLive<0)
-			{
-				tank.dead=false;
-				tank.move=this.movingLogic[i];
-			}
 			continue;
 		}
 		
@@ -301,7 +194,15 @@ Scene.prototype.update = function(gl, keysPressed) {
 		
 		if (tank.hit && !tank.dead)
 		{
-			this.kill(tank);			
+			tank.dead = true;
+			tank.hit = false;
+			tank.timeToLive=5;
+			
+			let anim=new GameObject(this.explosionMesh);
+			anim.position.set(tank.position);
+			anim.move=this.explosiomovinglogic;
+			anim.timeToLive=3;
+			this.gameObjects.animations.push(anim);	
 		}
 		
 	}
@@ -323,7 +224,7 @@ Scene.prototype.update = function(gl, keysPressed) {
 
 Scene.prototype.fire = function(tank)
 {
-	if (tank.cooldown>0)
+	if (tank.dead || tank.cooldown>0)
 		return null;
 	
 	tank.cooldown=0.5;
@@ -343,20 +244,6 @@ Scene.prototype.fire = function(tank)
 	
 }
 
-Scene.prototype.kill = function(tank)
-{
-	tank.dead = true;
-	tank.hit = false;
-	tank.move=this.explodingmovinglogic;
-	tank.timeToLive=5;
-	
-	let anim=new GameObject(this.explosionMesh);
-	anim.position.set(tank.position);
-	anim.move=this.explosiomovinglogic;
-	anim.timeToLive=3;
-	this.gameObjects.animations.push(anim);	
-			
-}
 
 
 

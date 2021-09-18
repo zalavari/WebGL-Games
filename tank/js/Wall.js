@@ -1,6 +1,6 @@
 const Wall = function(mesh, horizontal, width, length)
 {
-	this.gameObject=new GameObject(mesh);
+	GameObject.call(this, mesh);
 	
 	if (horizontal)
 	{
@@ -12,21 +12,13 @@ const Wall = function(mesh, horizontal, width, length)
 		this.length=width;
 		this.width=length;
 	}
-	this.gameObject.scale.set(this.length/2, this.width/2, 1);
-	this.position = this.gameObject.position; 
 	
+	this.scale.set(this.length/2, this.width/2, 1);
 }
 
+Wall.prototype = Object.create(GameObject.prototype);
 
-Wall.prototype.draw = function(camera){ 
-
-	//console.log(this.gameObject.scale.x);
-	
-  this.gameObject.updateModelTransformation();
-  Uniforms.trafo.modelMatrix.set().mul(this.gameObject.modelMatrix).mul(camera.viewProjMatrix);
-  Uniforms.trafo.viewInv.set().mul(camera.viewProjMatrix).invert();
-	//Uniforms.trafo.modelMatrix.set(this.modelMatrix);
-
-
-  this.gameObject.mesh.draw(); 
-};
+Object.defineProperty(Wall.prototype, 'constructor', {
+	value: Wall,
+	enumerable: false,
+	writable: true });
