@@ -24,12 +24,12 @@ const Scene = function(gl) {
 	//BACKGROUND
 	this.backgroundMaterial = new Material(gl, this.envProgram);
 	this.envTexture = new TextureCube(gl, [
-	"media/sky/3gr2019s_px.png",
-	"media/sky/3gr2019s_nx.png",
-	"media/sky/3gr2019s_py.png",
-	"media/sky/3gr2019s_ny.png",
-	"media/sky/3gr2019s_pz.png",
-	"media/sky/3gr2019s_nz.png",]
+	"media/sky/posx512.jpg",
+	"media/sky/negx512.jpg",
+	"media/sky/posy512.jpg",
+	"media/sky/negy512.jpg",
+	"media/sky/posz512.jpg",
+	"media/sky/negz512.jpg",]
 	);
 	/*this.envTexture = new TextureCube(gl, [
 	"media/sky/posx512.jpg",
@@ -90,7 +90,7 @@ const Scene = function(gl) {
 	
 	this.heli=true;
 	this.heliCamera =new HeliCamera();
-	//this.camera = this.heliCamera;
+	this.camera = this.heliCamera;
 	//this.camera.obj.position.set(0,10,-49);
 
 
@@ -114,32 +114,16 @@ const Scene = function(gl) {
 	this.chevyObject.body.position.set(0,2, 0);
 	this.chevyObject.body.resistance.set(1.5,0.1,0.5);
 
-//SNAKE
-
-	this.snake= [];
-
-	let e=new SnakeElement(this.chevyWheelMesh);
-	e.prevObj=this.chevyObject.body;
-	e.obj.scale.set(3,3,3);
-	this.snake.push(e);
-	for (let i=0; i<10; i++)
-	{
-		let e=new SnakeElement(this.chevyWheelMesh);
-		e.prevObj=this.snake[i].obj;
-		this.snake.push(e);
-	}	
-	
 
 
 
 	
-
 
 	this.gameObjects.push(this.backgroundObj);
 
 
 	this.gameObjects.push(this.chevyObject);
-	//this.gameObjects.push(this.plane);
+	this.gameObjects.push(this.plane);
 
 
 
@@ -175,13 +159,6 @@ Scene.prototype.update = function(gl, keysPressed) {
   
   this.camera.move(dt, keysPressed);
   
- 
- for (let i=0; i<this.snake.length; i++)
-	{
-		this.snake[i].move(t,dt,keysPressed,this.gameObjects);
-		
-	}	
-  
 
 
   // clear the screen
@@ -190,12 +167,6 @@ Scene.prototype.update = function(gl, keysPressed) {
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
 
-for (let i=0; i<this.snake.length; i++)
-	{
-		this.snake[i].draw(this.camera);
-		
-	}	
-	
   for(let i=0; i<this.gameObjects.length; i++) {
     this.gameObjects[i].draw(this.camera);
   }

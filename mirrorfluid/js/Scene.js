@@ -7,12 +7,12 @@ const Scene = function(gl) {
   this.quadGeometry = new QuadGeometry(gl);
   this.traceMaterial = new Material(gl, this.traceProgram);
   this.traceMaterial.envTexture.set(new TextureCube(gl, [
-	"media/sky/3gr2019s_px.png",
-	"media/sky/3gr2019s_nx.png",
-	"media/sky/3gr2019s_py.png",
-	"media/sky/3gr2019s_ny.png",
-	"media/sky/3gr2019s_pz.png",
-	"media/sky/3gr2019s_nz.png",]
+	"media/sky/posx512.jpg",
+	"media/sky/negx512.jpg",
+	"media/sky/posy512.jpg",
+	"media/sky/negy512.jpg",
+	"media/sky/posz512.jpg",
+	"media/sky/negz512.jpg",]
 	));
  // this.traceMaterial.noiseTexture.set(new Texture2D(gl, 'media/noise.png'))
   this.traceMesh = new Mesh(this.quadGeometry, this.traceMaterial);
