@@ -13,7 +13,7 @@ Controls:
 Red tank: ↑ ↓ → ← ENTER  
 Blue tank: W A S D X
 
-![tank](https://drive.google.com/uc?id=1D_5HsO6GoFeVt5F56r4QOLqAKhqHb_jM&export=download)
+![tank](https://github.com/zalavari/WebGL-Games/raw/main/gifs/tank_demo.gif)
 
 ## Cars and planets
 
@@ -23,7 +23,7 @@ I'm sure you have. But now you even have the chance to try it out! Although, onl
 [LIVE DEMO](http://zalavari.nhely.hu/WebGL/auto)  
 Controls: ↑ ↓ → ←
 
-![auto](https://drive.google.com/u/0/uc?id=1xbTZqkvWWoWliu2CP7OOO8RLREF6fHQx&export=download)
+![auto](https://github.com/zalavari/WebGL-Games/raw/main/gifs/auto_demo.gif)
 
 ## Car in water
 
@@ -34,7 +34,7 @@ The car is the same as before. But now the city is flooded, and trees grow out o
 Control the car with the ↑ ↓ → ← buttons.  
 By pressing C, you can jump to an outside camera, which you can control with the mouse and the W S A D E Q keys.
 
-![water](https://drive.google.com/uc?id=1AsNdlAM1xOiuenFszVZYWawASU5wu5-t&export=download)
+![water](https://github.com/zalavari/WebGL-Games/raw/main/gifs/water_demo.gif)
 
 ## Others
 
@@ -46,6 +46,6 @@ There are some other cool demos, such as dancing zombies, flying mercury balls, 
 [Splitting-flying mercury balls](http://zalavari.nhely.hu/WebGL/mirrorfluid)  
 [Car followed by tires](http://zalavari.nhely.hu/WebGL/snake)  
 
-![shiny](https://drive.google.com/uc?id=1149T2O5LkCjW0lVn_mKg8hsx5HYHaiYQ&export=download)
+![shiny](https://github.com/zalavari/WebGL-Games/raw/main/gifs/shinycar_demo.gif)
 
-![fluid](https://drive.google.com/uc?id=1eYBg89BusY1XfmvWkPQlimEdbU9PH5mW&export=download)
+![fluid](https://github.com/zalavari/WebGL-Games/raw/main/gifs/mirrorfluid_demo.gif)
